@@ -8,11 +8,34 @@ import argparse
 
 class Scraper:
     def __init__(self, base_url, base_headers, output_file):
+        """
+        Initializes a new instance of the class.
+
+        Args:
+            base_url (str): The base URL for making API requests.
+            base_headers (dict): The headers to be included in API requests.
+            output_file (str): The file path to write the output data.
+        """
+
         self.base_url = base_url
         self.base_headers = base_headers
         self.output_file = output_file
 
     def get_product_links(self, query, page_number=1):
+        """
+        Retrieves a list of product links from the specified page of the search results for the given query.
+
+        Parameters:
+            query (str): The search query.
+            page_number (int, optional): The page number of the search results. Defaults to 1.
+
+        Returns:
+            list: A list of product links.
+
+        Raises:
+            None
+        """
+                
         url = f"{self.base_url}search?q={query}&page={page_number}"
         response = requests.get(url, headers=self.base_headers)
         soup = bs(response.text, "html.parser")
@@ -20,7 +43,20 @@ class Scraper:
         product_links = [link["href"] for link in links]
         return product_links
 
-    def extract_product_info(self, product_url):
+    def extract_product_info(self, product_url):        
+        """
+        Extracts product information from a given product URL.
+        
+        Parameters:
+            product_url (str): The URL of the product to extract information from.
+        
+        Returns:
+            dict or None: A dictionary containing the product information, or None if the extraction fails.
+        
+        Raises:
+            None
+        """
+
         max_retries = 5
         backoff_factor = 3
 
@@ -57,6 +93,23 @@ class Scraper:
 
 
 def main():
+    """
+    The main function that scrapes Flipkart for products based on a given query and number of pages to scrape.
+    
+    This function parses command-line arguments using the `argparse` module to accept a search query and the number of pages to scrape. If no query is provided, the default query is "laptop". If no number of pages is provided, the default number of pages is 5.
+    
+    The function initializes a `Scraper` object with the base URL and headers. It then opens a file named "temp2.json" in write mode.
+    
+    The function enters a loop that scrapes the specified number of pages for products based on the search query. It prints the current page number being scraped. For each page, it retrieves the product links using the `get_product_links` method of the `Scraper` object.
+    
+    If there are no more product links or the page number exceeds the specified number of pages, the loop exits. For each product link, it extracts the product information using the `extract_product_info` method of the `Scraper` object. If the product information is not None, it writes the JSON representation of the product information to the output file.
+    
+    Parameters:
+        None
+    
+    Returns:
+        None
+    """
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Accept query and number of pages to scrape from Flipkart")
 
@@ -71,7 +124,7 @@ def main():
     print(f"Scraping {num_pages} pages for query: {query}")
 
     # Add Base URL and Headers
-    OUTPUT_FILE = "temp2.json"
+    OUTPUT_FILE = "temp.json"
     BASE_URL = "https://www.flipkart.com/"
     BASE_HEADERS = {
         "Accept": "*/*",
